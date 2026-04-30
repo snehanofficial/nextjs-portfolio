@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum LeadStatus {
+  NEW
+  REVIEWED
+  ARCHIVED
+}
+
+enum AssetResourceType {
+  IMAGE
+  RAW
+  VIDEO
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String?
+  role         UserRole  @default(ADMIN)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Asset {
+  id           String            @id @default(cuid())
+  publicId     String            @unique
+  url          String
+  secureUrl    String
+  resourceType AssetResourceType
+  format       String?
+  width        Int?
+  height       Int?
+  bytes        Int?
+  originalName String?
+  altText      String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  projects Project[]
+  skills   Skill[]
+  resumes  Resume[]
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  title        String
+  slug         String        @unique
+  summary      String
+  description  String
+  repositoryUrl String?
+  liveUrl      String?
+  featured     Boolean       @default(false)
+  sortOrder    Int           @default(0)
+  status       PublishStatus @default(DRAFT)
+  publishedAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  coverAssetId String?
+  coverAsset   Asset?        @relation(fields: [coverAssetId], references: [id], onDelete: SetNull)
+}
+
+model Skill {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  category    String
+  proficiency String?
+  sortOrder   Int           @default(0)
+  status      PublishStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  logoAssetId String?
+  logoAsset   Asset?        @relation(fields: [logoAssetId], references: [id], onDelete: SetNull)
+}
+
+model Resume {
+  id        String   @id @default(cuid())
+  version   String
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assetId String @unique
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Restrict)
+}
+
+model Lead {
+  id                String     @id @default(cuid())
+  name              String
+  email             String
+  subject           String
+  message           String
+  status            LeadStatus @default(NEW)
+  notes             String?
+  notificationSentAt DateTime?
+  notificationError String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model SiteSettings {
+  id                 String   @id @default("site-settings")
+  siteTitle          String
+  siteDescription    String
+  siteUrl            String?
+  heroTitle          String
+  heroDescription    String
+  aboutTitle         String
+  aboutBody          String
+  contactEmail       String
+  contactLocation    String?
+  githubUrl          String?
+  linkedinUrl        String?
+  xUrl               String?
+  seoTitle           String?
+  seoDescription     String?
+  seoKeywords        String[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model PageSection {
+  id         String        @id @default(cuid())
+  sectionKey String        @unique
+  title      String
+  content    Json
+  sortOrder  Int           @default(0)
+  status     PublishStatus @default(DRAFT)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}

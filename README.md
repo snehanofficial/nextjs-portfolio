@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dynamic Portfolio Platform
 
-## Getting Started
+A production-oriented portfolio platform built on `next@16.2.4` with a server-first App Router architecture, Prisma/PostgreSQL content models, Auth.js credentials auth, Cloudinary-backed asset management, and lead capture with Resend notifications.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Auth.js / NextAuth credentials auth
+- Prisma 7 with PostgreSQL
+- Cloudinary for media and file storage
+- Resend for lead notification emails
+
+## What’s Included
+
+### Public site
+
+- Homepage driven by `SiteSettings`, `PageSection`, featured `Project`, `Skill`, and `Resume` data
+- Project listing page and dynamic project detail pages
+- Resume download page
+- Contact form backed by a Server Action and persisted `Lead` records
+- SEO metadata plus generated `robots.txt` and `sitemap.xml`
+
+### Protected admin
+
+- Credentials sign-in for a seeded admin user
+- CRUD-style management flows for projects, skills, homepage content, and resume replacement
+- Lead review dashboard with status updates and notes
+- Server Action mutations with Zod validation and cache-tag refreshes
+
+### Asset model
+
+- Dedicated `Asset` table for Cloudinary-backed files
+- Relations from `Project`, `Skill`, and `Resume` instead of raw asset URLs
+- Safe orphan cleanup utilities for replace/delete workflows
+
+## Project Structure
+
+```text
+app/
+  (public)/
+  (admin)/
+  api/
+components/
+  admin/
+  forms/
+  ui/
+generated/
+  prisma/
+lib/
+  actions/
+  auth/
+  dal/
+  services/
+  validation/
+prisma/
+types/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env` and fill in:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+DATABASE_URL=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=http://localhost:3000
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=changeme123
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=portfolio@example.com
+LEAD_NOTIFICATION_EMAIL=you@example.com
+```
 
-## Learn More
+## Local Setup
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm install
+pnpm run db:generate
+pnpm run db:migrate
+pnpm run db:seed
+pnpm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Validation Commands
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm run typecheck
+pnpm run lint
+pnpm run build
+```
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Prisma 7 in this repo uses the generated client at `generated/prisma` plus the required `@prisma/adapter-pg` driver adapter.
+- Public content reads are cache-tagged with Next 16 Cache Components primitives.
+- Admin pages render dynamically behind Suspense boundaries to stay compatible with `cacheComponents: true`.
