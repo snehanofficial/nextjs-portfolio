@@ -1,4 +1,4 @@
-import type { Asset, PageSection, Project, Resume, SiteSettings, Skill } from "@/generated/prisma/client";
+import type { Asset, PageSection, Project, Resume, SiteSettings, Skill } from "@prisma/client";
 
 export type AssetDTO = {
   id: string;
